@@ -1,0 +1,30 @@
+package system
+
+import (
+	"fmt"
+	"time"
+)
+import "github.com/dgrijalva/jwt-go"
+
+func CreateToken(userID uint) (string, error) {
+	var jwtKey = []byte("your_secret_key")
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = userID
+	claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+	tokenString, err := token.SignedString(jwtKey)
+	return tokenString, err
+}
+
+func ValidateToken(signedToken string) (bool, error) {
+	token, err := jwt.Parse(signedToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte("your_secret_key"), nil
+	})
+	if err != nil {
+		return false, err
+	}
+	return token.Valid, nil
+}
