@@ -13,6 +13,7 @@ type LoginRequest struct {
 }
 
 func LoginHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request) {
+	db.WithContext(request.Context())
 	var loginRequest LoginRequest
 
 	err := json.NewDecoder(request.Body).Decode(&loginRequest)

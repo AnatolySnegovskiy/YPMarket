@@ -7,6 +7,7 @@ import (
 	"gorm.io/gorm"
 	"market/internal/entities"
 	"market/internal/services/points_calculation/hendlers/user"
+	iMiddleware "market/internal/services/points_calculation/middleware"
 	"net/http"
 )
 
@@ -27,12 +28,8 @@ func NewServer(dsn string) (*Server, error) {
 
 func (s *Server) Run() {
 	r := chi.NewRouter()
-
-	// Middleware
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-
-	// User routes
 	r.Post("/api/user/register",
 		func(writer http.ResponseWriter, request *http.Request) {
 			user.RegisterHandler(s.db, writer, request)
@@ -43,8 +40,14 @@ func (s *Server) Run() {
 		func(writer http.ResponseWriter, request *http.Request) {
 			user.LoginHandler(s.db, writer, request)
 		})
-	//r.Post("/api/user/orders", OrderHandler)
-	//r.Get("/api/user/orders", GetOrdersHandler)
+	r.With(iMiddleware.JwtAuthMiddleware).Post("/api/user/orders",
+		func(writer http.ResponseWriter, request *http.Request) {
+			user.CreateOrderHandler(s.db, writer, request)
+		})
+	r.With(iMiddleware.JwtAuthMiddleware).Get("/api/user/orders",
+		func(writer http.ResponseWriter, request *http.Request) {
+			user.GetOrdersHandler(s.db, writer, request)
+		})
 	//r.Get("/api/user/balance", GetBalanceHandler)
 	//r.Post("/api/user/balance/withdraw", WithdrawHandler)
 	//r.Get("/api/user/withdrawals", GetWithdrawalsHandler)

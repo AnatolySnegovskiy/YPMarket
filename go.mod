@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-chi/chi v1.5.5
+	github.com/theplant/luhn v0.0.0-20170224032821-81a1a381387a
 	golang.org/x/crypto v0.14.0
 	gorm.io/driver/postgres v1.5.7
 	gorm.io/gorm v1.25.10

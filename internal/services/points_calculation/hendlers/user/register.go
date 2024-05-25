@@ -13,6 +13,7 @@ type RegisterRequest struct {
 }
 
 func RegisterHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request) {
+	db.WithContext(request.Context())
 	var registerRequest RegisterRequest
 
 	err := json.NewDecoder(request.Body).Decode(&registerRequest)

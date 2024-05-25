@@ -23,8 +23,29 @@ func ValidateToken(signedToken string) (bool, error) {
 		}
 		return []byte("your_secret_key"), nil
 	})
+
 	if err != nil {
 		return false, err
 	}
 	return token.Valid, nil
+}
+
+func GetUserID(signedToken string) (int, error) {
+	token, err := jwt.Parse(signedToken, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte("your_secret_key"), nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		userID := int(claims["user_id"].(float64))
+		return userID, nil
+	}
+
+	return 0, fmt.Errorf("invalid token")
 }
