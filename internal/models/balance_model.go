@@ -25,10 +25,10 @@ type Withdrawals struct {
 	Sum         int    `json:"sum,omitempty"`
 }
 
-func NewBalanceModel(db *gorm.DB, userId int) *OrderModel {
+func NewBalanceModel(db *gorm.DB, userID int) *OrderModel {
 	u := &entities.UserEntity{}
-	if userId != 0 {
-		db.First(u, userId)
+	if userID != 0 {
+		db.First(u, userID)
 	}
 	return &OrderModel{
 		DB:         db,

@@ -11,7 +11,7 @@ type OrderEntity struct {
 	Number     string     `json:"order,omitempty" gorm:"not null;unique;name:order;type:varchar(255)"`
 	Status     string     `json:"status,omitempty" gorm:"not null;name:status;type:varchar(255)"`
 	Accrual    float64    `json:"accrual,omitempty" gorm:"not null;name:accrual;type:float"`
-	User       UserEntity `json:"-" gorm:"not null;foreignKey:ID;references:UserId;name:user;type:bigint"`
+	User       UserEntity `json:"-" gorm:"not null;foreignKey:ID;references:UserID;name:user;type:bigint"`
 }
 
 func (OrderEntity) TableName() string {

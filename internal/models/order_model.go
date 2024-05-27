@@ -15,10 +15,10 @@ type OrderModel struct {
 
 const StatusNew = "NEW"
 
-func NewOrderModel(db *gorm.DB, userId int) *OrderModel {
+func NewOrderModel(db *gorm.DB, userID int) *OrderModel {
 	u := &entities.UserEntity{}
-	if userId != 0 {
-		db.First(u, userId)
+	if userID != 0 {
+		db.First(u, userID)
 	}
 	return &OrderModel{
 		DB:         db,
