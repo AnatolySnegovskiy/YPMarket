@@ -48,8 +48,14 @@ func (s *Server) Run() {
 		func(writer http.ResponseWriter, request *http.Request) {
 			user.GetOrdersHandler(s.db, writer, request)
 		})
-	//r.Get("/api/user/balance", GetBalanceHandler)
-	//r.Post("/api/user/balance/withdraw", WithdrawHandler)
+	r.With(iMiddleware.JwtAuthMiddleware).Get("/api/user/balance",
+		func(writer http.ResponseWriter, request *http.Request) {
+			user.GetBalanceHandler(s.db, writer, request)
+		})
+	r.Post("/api/user/balance/withdraw",
+		func(writer http.ResponseWriter, request *http.Request) {
+			user.WithdrawHandler(s.db, writer, request)
+		})
 	//r.Get("/api/user/withdrawals", GetWithdrawalsHandler)
 
 	http.ListenAndServe(":8080", r)
