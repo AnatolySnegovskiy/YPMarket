@@ -17,7 +17,7 @@ type Server struct {
 
 func NewServer(dsn string) (*Server, error) {
 	db, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	err := db.AutoMigrate(&entities.UserEntity{}, &entities.BalanceHistoryEntity{})
+	err := db.AutoMigrate(&entities.UserEntity{}, &entities.BalanceHistoryEntity{}, &entities.OrderEntity{})
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +56,10 @@ func (s *Server) Run() {
 		func(writer http.ResponseWriter, request *http.Request) {
 			user.WithdrawHandler(s.db, writer, request)
 		})
-	//r.Get("/api/user/withdrawals", GetWithdrawalsHandler)
+	r.Get("/api/user/withdrawals",
+		func(writer http.ResponseWriter, request *http.Request) {
+			user.GetWithdrawalsHandler(s.db, writer, request)
+		})
 
 	http.ListenAndServe(":8080", r)
 }

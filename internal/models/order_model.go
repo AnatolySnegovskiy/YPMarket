@@ -24,7 +24,7 @@ func NewOrderModel(db *gorm.DB, userId int) *OrderModel {
 	}
 }
 
-func (o *OrderModel) CreateOrder(orderNumber string) error {
+func (m *OrderModel) CreateOrder(orderNumber string) error {
 	num, err := strconv.Atoi(orderNumber)
 
 	if err != nil {
@@ -36,9 +36,9 @@ func (o *OrderModel) CreateOrder(orderNumber string) error {
 	}
 
 	var existingOrder entities.OrderEntity
-	result := o.DB.Where("number = ?", orderNumber).First(&existingOrder)
+	result := m.DB.Where("number = ?", orderNumber).First(&existingOrder)
 
-	if result.RowsAffected == 1 && existingOrder.User.ID == o.UserEntity.ID {
+	if result.RowsAffected == 1 && existingOrder.User.ID == m.UserEntity.ID {
 		return fmt.Errorf("already exists current user")
 	}
 
@@ -46,14 +46,14 @@ func (o *OrderModel) CreateOrder(orderNumber string) error {
 		return fmt.Errorf("already exists")
 	}
 
-	o.UserEntity.Orders = append(o.UserEntity.Orders, entities.OrderEntity{
+	m.UserEntity.Orders = append(m.UserEntity.Orders, entities.OrderEntity{
 		Number: orderNumber,
 		Status: StatusNew,
 	})
 
-	return o.DB.Save(o.UserEntity).Error
+	return m.DB.Save(m.UserEntity).Error
 }
 
-func (o *OrderModel) GetOrders() []entities.OrderEntity {
-	return o.UserEntity.Orders
+func (m *OrderModel) GetOrders() []entities.OrderEntity {
+	return m.UserEntity.Orders
 }

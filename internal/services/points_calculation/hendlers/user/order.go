@@ -44,3 +44,10 @@ func GetOrdersHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Req
 	writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(writer).Encode(orders)
 }
+
+func GetWithdrawalsHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request) {
+	db.WithContext(request.Context())
+	withdrawals := models.NewBalanceModel(db, request.Context().Value("user_id").(int)).GetWithdrawals()
+	writer.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(writer).Encode(withdrawals)
+}
