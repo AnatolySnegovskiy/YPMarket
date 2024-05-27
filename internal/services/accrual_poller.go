@@ -35,32 +35,25 @@ func (o *OrderAccrual) PollAccrualSystem(interval time.Duration) {
 	balanceModel := models.NewBalanceModel(o.db, 0)
 	orderModel := models.NewOrderModel(o.db, 0)
 
-	for {
-		select {
-		case <-ticker.C:
-			orders := orderModel.GetOrdersByStatus([]string{"REGISTERED", "PROCESSING"})
-			for _, order := range orders {
-				res, err := o.fetchOrderAccrual(order.Number)
+	for range ticker.C {
+		orders := orderModel.GetOrdersByStatus([]string{"REGISTERED", "PROCESSING"})
+		for _, order := range orders {
+			res, err := o.fetchOrderAccrual(order.Number)
 
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+
+			order.Accrual = res.Accrual
+			order.Status = res.Status
+			o.db.Save(orders)
+			if res.Status == "PROCESSED" {
+				err := balanceModel.Deposit("", res.Accrual)
 				if err != nil {
 					fmt.Println(err)
 					continue
 				}
-
-				order.Accrual = res.Accrual
-				order.Status = res.Status
-
-				if res.Status == "PROCESSED" {
-					err := balanceModel.Deposit("", res.Accrual)
-					if err != nil {
-						fmt.Println(err)
-						continue
-					}
-				}
-			}
-
-			if len(orders) != 0 {
-				o.db.Save(orders)
 			}
 		}
 	}
