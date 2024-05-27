@@ -27,7 +27,9 @@ type Withdrawals struct {
 
 func NewBalanceModel(db *gorm.DB, userId int) *OrderModel {
 	u := &entities.UserEntity{}
-	db.First(u, userId)
+	if userId != 0 {
+		db.First(u, userId)
+	}
 	return &OrderModel{
 		DB:         db,
 		UserEntity: u,
@@ -41,7 +43,7 @@ func (m *OrderModel) GetBalance() *CurrentBalance {
 	return &balance
 }
 
-func (m *OrderModel) Withdraw(order int, sum int) error {
+func (m *OrderModel) Withdraw(order string, sum float64) error {
 	if sum <= 0 {
 		return fmt.Errorf("invalid sum")
 	}
@@ -49,28 +51,38 @@ func (m *OrderModel) Withdraw(order int, sum int) error {
 		return fmt.Errorf("not enough money")
 	}
 
+	orderEntity := entities.OrderEntity{}
+	m.DB.Model(&entities.OrderEntity{}).Where("number = ?", order).First(&orderEntity)
+
 	m.UserEntity.Balance -= float64(sum)
 	m.UserEntity.Withdrawal += float64(sum)
 	historyEntity := entities.BalanceHistoryEntity{}
 	historyEntity.Amount = float64(sum)
 	historyEntity.Operation = withdrawOperation
 	historyEntity.User = *m.UserEntity
-	historyEntity.Order = m.UserEntity.Orders[order]
+	historyEntity.Order = orderEntity
 	m.UserEntity.BalanceHistory = append(m.UserEntity.BalanceHistory, historyEntity)
 	return m.DB.Save(m.UserEntity).Error
 }
 
-func (m *OrderModel) Deposit(order int, sum int) error {
+func (m *OrderModel) Deposit(order string, sum float64) error {
 	if sum <= 0 {
 		return fmt.Errorf("invalid sum")
 	}
+	orderEntity := entities.OrderEntity{}
+	m.DB.Model(&entities.OrderEntity{}).Where("number = ?", order).First(&orderEntity)
 
+	if orderEntity.User.ID != m.UserEntity.ID {
+		return fmt.Errorf("invalid order")
+	}
+
+	m.UserEntity = &orderEntity.User
 	m.UserEntity.Balance += float64(sum)
 	historyEntity := entities.BalanceHistoryEntity{}
 	historyEntity.Amount = float64(sum)
 	historyEntity.Operation = depositOperation
 	historyEntity.User = *m.UserEntity
-	historyEntity.Order = m.UserEntity.Orders[order]
+	historyEntity.Order = orderEntity
 	m.UserEntity.BalanceHistory = append(m.UserEntity.BalanceHistory, historyEntity)
 	return m.DB.Save(m.UserEntity).Error
 }

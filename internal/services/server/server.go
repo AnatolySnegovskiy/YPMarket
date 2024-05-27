@@ -1,13 +1,12 @@
-package points_calculation
+package server
 
 import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
-	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"market/internal/entities"
-	"market/internal/services/points_calculation/hendlers/user"
-	iMiddleware "market/internal/services/points_calculation/middleware"
+	"market/internal/services/server/hendlers/user"
+	iMiddleware "market/internal/services/server/middleware"
+	db2 "market/internal/system/db"
 	"net/http"
 )
 
@@ -16,17 +15,13 @@ type Server struct {
 }
 
 func NewServer(dsn string) (*Server, error) {
-	db, _ := gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	err := db.AutoMigrate(&entities.UserEntity{}, &entities.BalanceHistoryEntity{}, &entities.OrderEntity{})
-	if err != nil {
-		return nil, err
-	}
+	db, err := db2.Init(dsn)
 	return &Server{
 		db: db,
-	}, nil
+	}, err
 }
 
-func (s *Server) Run() {
+func (s *Server) Run(runAddress string) {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -61,5 +56,5 @@ func (s *Server) Run() {
 			user.GetWithdrawalsHandler(s.db, writer, request)
 		})
 
-	http.ListenAndServe(":8080", r)
+	http.ListenAndServe(runAddress, r)
 }

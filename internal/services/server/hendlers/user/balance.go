@@ -8,8 +8,8 @@ import (
 )
 
 type WithdrawRequest struct {
-	Order int `json:"order"`
-	Sum   int `json:"sum"`
+	Order string  `json:"order"`
+	Sum   float64 `json:"sum"`
 }
 
 func GetBalanceHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request) {

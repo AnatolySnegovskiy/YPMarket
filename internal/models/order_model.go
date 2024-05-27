@@ -17,7 +17,9 @@ const StatusNew = "NEW"
 
 func NewOrderModel(db *gorm.DB, userId int) *OrderModel {
 	u := &entities.UserEntity{}
-	db.First(u, userId)
+	if userId != 0 {
+		db.First(u, userId)
+	}
 	return &OrderModel{
 		DB:         db,
 		UserEntity: u,
@@ -56,4 +58,10 @@ func (m *OrderModel) CreateOrder(orderNumber string) error {
 
 func (m *OrderModel) GetOrders() []entities.OrderEntity {
 	return m.UserEntity.Orders
+}
+
+func (m *OrderModel) GetOrdersByStatus(status []string) []entities.OrderEntity {
+	var orders []entities.OrderEntity
+	m.DB.Where("status IN ?", status).Find(&orders)
+	return orders
 }
