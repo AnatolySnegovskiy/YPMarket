@@ -16,7 +16,7 @@ func CreateOrderHandler(db *gorm.DB, writer http.ResponseWriter, request *http.R
 		return
 	}
 
-	err = models.NewOrderModel(db, request.Context().Value("user_id").(int)).CreateOrder(string(body))
+	err = models.NewOrderModel(db, getUserID(request)).CreateOrder(string(body))
 	if err != nil {
 		switch err.Error() {
 		case "already exists current user":
@@ -41,14 +41,14 @@ func CreateOrderHandler(db *gorm.DB, writer http.ResponseWriter, request *http.R
 
 func GetOrdersHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request) {
 	db.WithContext(request.Context())
-	orders := models.NewOrderModel(db, request.Context().Value("user_id").(int)).GetOrders()
+	orders := models.NewOrderModel(db, getUserID(request)).GetOrders()
 	writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(writer).Encode(orders)
 }
 
 func GetWithdrawalsHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request) {
 	db.WithContext(request.Context())
-	withdrawals := models.NewBalanceModel(db, request.Context().Value("user_id").(int)).GetWithdrawals()
+	withdrawals := models.NewBalanceModel(db, getUserID(request)).GetWithdrawals()
 	writer.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(writer).Encode(withdrawals)
 }

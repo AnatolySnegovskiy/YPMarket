@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"gorm.io/gorm"
 	"market/internal/models"
+	"market/internal/services/server/middleware"
 	"net/http"
 )
 
@@ -39,4 +40,8 @@ func LoginHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request
 	writer.Header().Set("Authorization", token)
 	writer.WriteHeader(http.StatusOK)
 	writer.Write([]byte(token))
+}
+
+func getUserID(request *http.Request) int {
+	return request.Context().Value(middleware.UserIDContextKey).(int)
 }
