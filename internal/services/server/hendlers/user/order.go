@@ -21,7 +21,10 @@ func CreateOrderHandler(db *gorm.DB, writer http.ResponseWriter, request *http.R
 		switch err.Error() {
 		case "already exists current user":
 			writer.WriteHeader(http.StatusOK)
-			writer.Write([]byte("Already exists current user"))
+			_, err := writer.Write([]byte("Already exists current user"))
+			if err != nil {
+				http.Error(writer, err.Error(), http.StatusInternalServerError)
+			}
 			return
 		case "already exist":
 			http.Error(writer, "Already exist other user", http.StatusConflict)
@@ -43,12 +46,20 @@ func GetOrdersHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Req
 	db.WithContext(request.Context())
 	orders := models.NewOrderModel(db, getUserID(request)).GetOrders()
 	writer.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(writer).Encode(orders)
+	err := json.NewEncoder(writer).Encode(orders)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func GetWithdrawalsHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request) {
 	db.WithContext(request.Context())
 	withdrawals := models.NewBalanceModel(db, getUserID(request)).GetWithdrawals()
 	writer.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(writer).Encode(withdrawals)
+	err := json.NewEncoder(writer).Encode(withdrawals)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }

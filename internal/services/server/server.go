@@ -21,7 +21,7 @@ func NewServer(dsn string) (*Server, error) {
 	}, err
 }
 
-func (s *Server) Run(runAddress string) {
+func (s *Server) Run(runAddress string) error {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -56,5 +56,5 @@ func (s *Server) Run(runAddress string) {
 			user.GetWithdrawalsHandler(s.db, writer, request)
 		})
 
-	http.ListenAndServe(runAddress, r)
+	return http.ListenAndServe(runAddress, r)
 }

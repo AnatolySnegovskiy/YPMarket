@@ -33,7 +33,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	s.Run(runAddress)
+
+	err = s.Run(runAddress)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func getEnv(key, defaultValue string) string {

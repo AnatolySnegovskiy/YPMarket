@@ -16,7 +16,11 @@ func GetBalanceHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Re
 	db.WithContext(request.Context())
 	balance := models.NewBalanceModel(db, getUserID(request)).GetBalance()
 	writer.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(writer).Encode(balance)
+	err := json.NewEncoder(writer).Encode(balance)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		return
+	}
 }
 
 func WithdrawHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request) {
