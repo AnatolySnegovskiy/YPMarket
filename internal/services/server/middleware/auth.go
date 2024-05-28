@@ -6,11 +6,13 @@ import (
 	"net/http"
 )
 
+const userIDKey string = "user_id"
+
 func JwtAuthMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		userId, err := system.GetUserID(request.Header.Get("Authorization"))
-		if err == nil && userId > 0 {
-			next.ServeHTTP(writer, request.WithContext(context.WithValue(request.Context(), "user_id", userId)))
+		userID, err := system.GetUserID(request.Header.Get("Authorization"))
+		if err == nil && userID > 0 {
+			next.ServeHTTP(writer, request.WithContext(context.WithValue(request.Context(), userIDKey, userID)))
 		} else {
 			writer.WriteHeader(http.StatusUnauthorized)
 		}

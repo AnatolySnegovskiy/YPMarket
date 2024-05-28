@@ -47,7 +47,8 @@ func (o *OrderAccrual) PollAccrualSystem(interval time.Duration) {
 
 			order.Accrual = res.Accrual
 			order.Status = res.Status
-			o.db.Save(orders)
+			o.db.Save(order)
+
 			if res.Status == "PROCESSED" {
 				err := balanceModel.Deposit("", res.Accrual)
 				if err != nil {

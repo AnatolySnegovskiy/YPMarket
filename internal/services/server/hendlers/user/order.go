@@ -22,19 +22,20 @@ func CreateOrderHandler(db *gorm.DB, writer http.ResponseWriter, request *http.R
 		case "already exists current user":
 			writer.WriteHeader(http.StatusOK)
 			writer.Write([]byte("Already exists current user"))
-			break
+			return
 		case "already exist":
 			http.Error(writer, "Already exist other user", http.StatusConflict)
-			break
+			return
 		case "invalid request":
 			http.Error(writer, "Invalid request", http.StatusBadRequest)
-			break
+			return
 		case "invalid format":
 			http.Error(writer, "Invalid format", http.StatusUnprocessableEntity)
+			return
 		default:
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+			return
 		}
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
-		return
 	}
 }
 
