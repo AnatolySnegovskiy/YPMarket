@@ -31,7 +31,7 @@ func RegisterHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Requ
 		case "user already exists":
 			http.Error(writer, "User already exists", http.StatusConflict)
 		default:
-			http.Error(writer, "Internal server error", http.StatusInternalServerError)
+			http.Error(writer, "Internal server error: "+err.Error(), http.StatusInternalServerError)
 		}
 		return
 	}

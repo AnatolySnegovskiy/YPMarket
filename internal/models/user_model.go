@@ -24,10 +24,6 @@ func NewUserModel(db *gorm.DB) *UserModel {
 }
 
 func (m *UserModel) Authenticate(email string, password string) (string, error) {
-	if !validateEmail(email) {
-		return "", fmt.Errorf("invalid email")
-	}
-
 	user, _ := m.getUserByEmail(email)
 	if user.ID == 0 || !checkPasswordHash(password, user.Password) {
 		return "", fmt.Errorf("invalid login or password")
@@ -37,10 +33,6 @@ func (m *UserModel) Authenticate(email string, password string) (string, error) 
 }
 
 func (m *UserModel) Registration(email string, password string) error {
-	if !validateEmail(email) {
-		return fmt.Errorf("invalid email")
-	}
-
 	u, _ := m.getUserByEmail(email)
 
 	if u.ID != 0 {

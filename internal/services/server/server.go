@@ -25,12 +25,12 @@ func (s *Server) Run(runAddress string) error {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+
 	r.Post("/api/user/register",
 		func(writer http.ResponseWriter, request *http.Request) {
 			user.RegisterHandler(s.db, writer, request)
 		},
 	)
-
 	r.Post("/api/user/login",
 		func(writer http.ResponseWriter, request *http.Request) {
 			user.LoginHandler(s.db, writer, request)
