@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 	"market/internal/entities"
 	"market/internal/system"
-	"net/mail"
 )
 
 type UserModel struct {
@@ -62,11 +61,6 @@ func (m *UserModel) getUserByEmail(email string) (*entities.UserEntity, error) {
 	where := "email = ?"
 	err := m.DB.Model(m.UserEntity).Where(where, email).First(user).Error
 	return user, err
-}
-
-func validateEmail(email string) bool {
-	_, err := mail.ParseAddress(email)
-	return err == nil
 }
 
 func hashPassword(password string) (string, error) {
