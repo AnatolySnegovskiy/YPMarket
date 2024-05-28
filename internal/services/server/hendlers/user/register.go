@@ -1,8 +1,10 @@
 package user
 
 import (
+	"bytes"
 	"encoding/json"
 	"gorm.io/gorm"
+	"io"
 	"market/internal/models"
 	"net/http"
 )
@@ -15,8 +17,9 @@ type RegisterRequest struct {
 func RegisterHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request) {
 	db.WithContext(request.Context())
 	var registerRequest RegisterRequest
-
-	err := json.NewDecoder(request.Body).Decode(&registerRequest)
+	bodyBytes, err := io.ReadAll(request.Body)
+	request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+	err = json.NewDecoder(request.Body).Decode(&registerRequest)
 
 	if err != nil || registerRequest.Login == "" || registerRequest.Password == "" {
 		http.Error(writer, "Failed to decode request body", http.StatusBadRequest)
@@ -36,5 +39,7 @@ func RegisterHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	LoginHandler(db, writer, request)
+	clonedRequest := request.Clone(request.Context())
+	clonedRequest.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
+	LoginHandler(db, writer, clonedRequest)
 }
