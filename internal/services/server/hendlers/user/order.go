@@ -40,6 +40,8 @@ func CreateOrderHandler(db *gorm.DB, writer http.ResponseWriter, request *http.R
 			return
 		}
 	}
+
+	writer.WriteHeader(http.StatusAccepted)
 }
 
 func GetOrdersHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request) {
