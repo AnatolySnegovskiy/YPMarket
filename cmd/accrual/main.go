@@ -1,4 +1,4 @@
-package accrual
+package main
 
 import (
 	"market/config"
