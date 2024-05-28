@@ -18,6 +18,11 @@ func RegisterHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Requ
 	db.WithContext(request.Context())
 	var registerRequest RegisterRequest
 	bodyBytes, err := io.ReadAll(request.Body)
+	if err != nil {
+		http.Error(writer, "Failed to read request body", http.StatusInternalServerError)
+		return
+	}
+
 	request.Body = io.NopCloser(bytes.NewBuffer(bodyBytes))
 	err = json.NewDecoder(request.Body).Decode(&registerRequest)
 
