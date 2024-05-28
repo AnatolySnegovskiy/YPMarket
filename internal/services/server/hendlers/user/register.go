@@ -36,5 +36,5 @@ func RegisterHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Requ
 		return
 	}
 
-	writer.WriteHeader(http.StatusOK)
+	LoginHandler(db, writer, request)
 }
