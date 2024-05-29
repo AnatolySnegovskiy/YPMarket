@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"io"
-	"log"
 	"market/internal/models"
 	db2 "market/internal/system/db"
 	"net/http"
@@ -39,7 +38,6 @@ func (o *OrderAccrual) PollAccrualSystem(interval time.Duration) {
 	for range ticker.C {
 		orders := orderModel.GetOrdersByStatus([]string{"REGISTERED", "PROCESSING", "NEW"})
 		for _, order := range orders {
-			log.Println(order.Number)
 			res, err := o.fetchOrderAccrual(order.Number)
 
 			if err != nil {
@@ -68,7 +66,6 @@ func (o *OrderAccrual) fetchOrderAccrual(orderNumber string) (*OrderAccrualRespo
 	}
 
 	url := fmt.Sprintf("%s/api/orders/%s", o.address, orderNumber)
-	log.Print(url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -84,7 +81,6 @@ func (o *OrderAccrual) fetchOrderAccrual(orderNumber string) (*OrderAccrualRespo
 	case http.StatusOK:
 		var response OrderAccrualResponse
 		body, err := io.ReadAll(resp.Body)
-		log.Print(body)
 		if err != nil {
 			return nil, err
 		}

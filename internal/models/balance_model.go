@@ -71,7 +71,7 @@ func (m *OrderModel) Deposit(order string, sum float64) error {
 	orderEntity := entities.OrderEntity{}
 	m.DB.Model(&entities.OrderEntity{}).Where("number = ?", order).First(&orderEntity)
 
-	if orderEntity.UserID != m.UserEntity.ID {
+	if orderEntity.UserID != m.UserEntity.ID && m.UserEntity.ID != 0 {
 		return fmt.Errorf("invalid order")
 	}
 
