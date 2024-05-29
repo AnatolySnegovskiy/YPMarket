@@ -54,6 +54,7 @@ func GetOrdersHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Req
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	writer.WriteHeader(http.StatusOK)
 }
 
 func GetWithdrawalsHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request) {
@@ -65,4 +66,5 @@ func GetWithdrawalsHandler(db *gorm.DB, writer http.ResponseWriter, request *htt
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	writer.WriteHeader(http.StatusOK)
 }

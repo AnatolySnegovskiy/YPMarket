@@ -21,6 +21,7 @@ func GetBalanceHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Re
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	writer.WriteHeader(http.StatusOK)
 }
 
 func WithdrawHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request) {

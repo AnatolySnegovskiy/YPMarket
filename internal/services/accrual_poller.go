@@ -36,7 +36,7 @@ func (o *OrderAccrual) PollAccrualSystem(interval time.Duration) {
 	orderModel := models.NewOrderModel(o.db, 0)
 
 	for range ticker.C {
-		orders := orderModel.GetOrdersByStatus([]string{"REGISTERED", "PROCESSING"})
+		orders := orderModel.GetOrdersByStatus([]string{"REGISTERED", "PROCESSING", "NEW"})
 		for _, order := range orders {
 			res, err := o.fetchOrderAccrual(order.Number)
 

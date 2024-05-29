@@ -14,7 +14,7 @@ type BaseConfig struct {
 func NewBaseConfig() BaseConfig {
 	defaultRunAddress := "localhost:8080"
 	defaultDatabaseURI := "postgres://postgres:root@localhost:5432"
-	defaultAccrualSystemAddress := "http://localhost:8000"
+	defaultAccrualSystemAddress := "http://localhost:8080"
 
 	runAddress := getEnv("RUN_ADDRESS", defaultRunAddress)
 	databaseURI := getEnv("DATABASE_URI", defaultDatabaseURI)
