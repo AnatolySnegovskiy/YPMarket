@@ -1,7 +1,6 @@
 package models
 
 import (
-	"encoding/json"
 	"fmt"
 	"gorm.io/gorm"
 	"log"
@@ -90,15 +89,11 @@ func (m *OrderModel) Deposit(order string, sum float64) error {
 
 func (m *OrderModel) GetWithdrawals() []Withdrawals {
 	var withdrawals []Withdrawals
-	var balanceHistory []entities.BalanceHistoryEntity
-	m.DB.Model(&entities.BalanceHistoryEntity{}).First(balanceHistory)
-	response, _ := json.Marshal(balanceHistory)
-	log.Println(string(response))
-
+	log.Println(m.UserEntity.ID)
 	m.DB.Model(&entities.BalanceHistoryEntity{}).
 		Select("sum(balance_history.amount) as sum, balance_history.updated_at as processed_at, orders.number as order").
 		Joins("LEFT JOIN orders ON balance_history.order_id = orders.id").
-		Where("balance_history.operation = ?", withdrawOperation).
+		Where("orders.user_id = ? AND balance_history.operation = ?", m.UserEntity.ID, withdrawOperation).
 		Group("balance_history.updated_at, orders.number").
 		Order("balance_history.updated_at desc").
 		Find(&withdrawals)
