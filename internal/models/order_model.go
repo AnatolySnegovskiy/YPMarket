@@ -59,6 +59,7 @@ func (m *OrderModel) CreateOrder(orderNumber string) error {
 }
 
 func (m *OrderModel) GetOrders() []entities.OrderEntity {
+	m.DB.Preload("Orders").First(&m.UserEntity, m.UserEntity.ID)
 	return m.UserEntity.Orders
 }
 
