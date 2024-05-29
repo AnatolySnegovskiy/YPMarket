@@ -3,7 +3,6 @@ package models
 import (
 	"fmt"
 	"gorm.io/gorm"
-	"log"
 	"market/internal/entities"
 	"time"
 )
@@ -52,10 +51,13 @@ func (m *OrderModel) Withdraw(order string, sum float64) error {
 	if m.UserEntity.Balance < sum {
 		return fmt.Errorf("not enough money")
 	}
-	log.Print(order)
 	orderEntity := entities.OrderEntity{}
 	m.DB.Model(&entities.OrderEntity{}).Where("number = ?", order).First(&orderEntity)
-	log.Print(orderEntity.ID)
+
+	if orderEntity.ID == 0 {
+		return fmt.Errorf("invalid order")
+	}
+
 	m.UserEntity.Balance -= sum
 	m.UserEntity.Withdrawal += sum
 	historyEntity := entities.BalanceHistoryEntity{}

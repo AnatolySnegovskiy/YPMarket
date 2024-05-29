@@ -35,8 +35,17 @@ func WithdrawHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Requ
 
 	err = models.NewBalanceModel(db, getUserID(request)).Withdraw(withdrawRequest.Order, withdrawRequest.Sum)
 	if err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
-		return
+		switch err.Error() {
+		case "not enough money":
+			http.Error(writer, "not enough money", http.StatusPaymentRequired)
+			return
+		case "invalid order":
+			http.Error(writer, "invalid sum", http.StatusUnprocessableEntity)
+			return
+		default:
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+			return
+		}
 	}
 	writer.WriteHeader(http.StatusOK)
 }
