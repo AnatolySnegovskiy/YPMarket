@@ -90,7 +90,7 @@ func (m *OrderModel) GetWithdrawals() []Withdrawals {
 	m.DB.Model(&entities.BalanceHistoryEntity{}).
 		Select("sum(balance_history.amount) as sum, balance_history.updated_at as processed_at, orders.number as order").
 		Joins("LEFT JOIN orders ON balance_history.order_id = orders.id").
-		Where("orders.user_id = ? AND balance_history.operation = ?", m.UserEntity.ID, withdrawOperation).
+		Where("balance_history.operation = ?", withdrawOperation).
 		Group("balance_history.updated_at, orders.number").
 		Order("balance_history.updated_at desc").
 		Find(&withdrawals)

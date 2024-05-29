@@ -17,7 +17,6 @@ const StatusNew = "NEW"
 
 func NewOrderModel(db *gorm.DB, userID int) *OrderModel {
 	u := &entities.UserEntity{}
-
 	if userID != 0 {
 		db.First(u, userID)
 	}
