@@ -49,7 +49,7 @@ func GetUserID(signedToken string) (int, error) {
 		} else {
 			return 0, fmt.Errorf("user_id claim is missing or not of type float64")
 		}
-		
+
 		return userID, nil
 	}
 

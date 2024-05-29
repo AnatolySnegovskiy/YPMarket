@@ -2,10 +2,8 @@ package models
 
 import (
 	"fmt"
-	"github.com/theplant/luhn"
 	"gorm.io/gorm"
 	"market/internal/entities"
-	"strconv"
 )
 
 type OrderModel struct {
@@ -27,16 +25,6 @@ func NewOrderModel(db *gorm.DB, userID int) *OrderModel {
 }
 
 func (m *OrderModel) CreateOrder(orderNumber string) error {
-	num, err := strconv.Atoi(orderNumber)
-
-	if err != nil {
-		return fmt.Errorf("invalid request")
-	}
-
-	if luhn.Valid(num) {
-		return fmt.Errorf("invalid format")
-	}
-
 	var existingOrder entities.OrderEntity
 	result := m.DB.Where("number = ?", orderNumber).First(&existingOrder)
 
