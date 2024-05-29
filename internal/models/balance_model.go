@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"market/internal/entities"
+	"time"
 )
 
 type BalanceModel struct {
@@ -20,9 +21,9 @@ type CurrentBalance struct {
 }
 
 type Withdrawals struct {
-	Order       string  `json:"order,omitempty"`
-	Sum         float64 `json:"sum,omitempty"`
-	ProcessedAt string  `json:"processed_at,omitempty"`
+	Order       string    `json:"order,omitempty"`
+	Sum         float64   `json:"sum,omitempty"`
+	ProcessedAt time.Time `json:"processed_at,omitempty"`
 }
 
 func NewBalanceModel(db *gorm.DB, userID int) *OrderModel {
@@ -90,7 +91,7 @@ func (m *OrderModel) GetWithdrawals() []Withdrawals {
 	m.DB.Model(&entities.BalanceHistoryEntity{}).
 		Select("sum(balance_history.amount) as sum, balance_history.updated_at as processed_at, orders.number as order").
 		Joins("LEFT JOIN orders ON balance_history.order_id = orders.id").
-		Where("orders.user_id = ? AND balance_history.operation = ?", m.UserEntity.ID, withdrawOperation).
+		Where("balance_history.operation = ?", withdrawOperation).
 		Group("balance_history.updated_at, orders.number").
 		Order("balance_history.updated_at desc").
 		Find(&withdrawals)
