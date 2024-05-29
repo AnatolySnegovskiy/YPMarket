@@ -46,7 +46,7 @@ func (m *OrderModel) CreateOrder(orderNumber string) error {
 	}
 
 	if result.RowsAffected == 1 {
-		return fmt.Errorf("already exists")
+		return fmt.Errorf("already exist")
 	}
 
 	m.UserEntity.Orders = append(m.UserEntity.Orders, entities.OrderEntity{
