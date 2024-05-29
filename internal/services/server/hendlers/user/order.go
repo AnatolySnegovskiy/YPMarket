@@ -16,7 +16,8 @@ func CreateOrderHandler(db *gorm.DB, writer http.ResponseWriter, request *http.R
 		return
 	}
 
-	err = models.NewOrderModel(db, getUserID(request)).CreateOrder(string(body))
+	om := models.NewOrderModel(db, getUserID(request))
+	err = om.CreateOrder(string(body))
 	if err != nil {
 		switch err.Error() {
 		case "already exists current user":

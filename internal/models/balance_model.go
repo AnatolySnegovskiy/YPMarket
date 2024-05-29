@@ -47,20 +47,19 @@ func (m *OrderModel) Withdraw(order string, sum float64) error {
 	if sum <= 0 {
 		return fmt.Errorf("invalid sum")
 	}
-	if m.UserEntity.Balance < float64(sum) {
+	if m.UserEntity.Balance < sum {
 		return fmt.Errorf("not enough money")
 	}
 
 	orderEntity := entities.OrderEntity{}
 	m.DB.Model(&entities.OrderEntity{}).Where("number = ?", order).First(&orderEntity)
 
-	m.UserEntity.Balance -= float64(sum)
-	m.UserEntity.Withdrawal += float64(sum)
+	m.UserEntity.Balance -= sum
+	m.UserEntity.Withdrawal += sum
 	historyEntity := entities.BalanceHistoryEntity{}
-	historyEntity.Amount = float64(sum)
+	historyEntity.Amount = sum
 	historyEntity.Operation = withdrawOperation
-	historyEntity.User = *m.UserEntity
-	historyEntity.Order = orderEntity
+	historyEntity.OrderID = orderEntity.ID
 	m.UserEntity.BalanceHistory = append(m.UserEntity.BalanceHistory, historyEntity)
 	return m.DB.Save(m.UserEntity).Error
 }
@@ -72,17 +71,16 @@ func (m *OrderModel) Deposit(order string, sum float64) error {
 	orderEntity := entities.OrderEntity{}
 	m.DB.Model(&entities.OrderEntity{}).Where("number = ?", order).First(&orderEntity)
 
-	if orderEntity.User.ID != m.UserEntity.ID {
+	if orderEntity.UserID != m.UserEntity.ID {
 		return fmt.Errorf("invalid order")
 	}
 
-	m.UserEntity = &orderEntity.User
-	m.UserEntity.Balance += float64(sum)
+	m.DB.Model(&entities.UserEntity{}).Where("id = ?", orderEntity.UserID).First(m.UserEntity)
+	m.UserEntity.Balance += sum
 	historyEntity := entities.BalanceHistoryEntity{}
-	historyEntity.Amount = float64(sum)
+	historyEntity.Amount = sum
 	historyEntity.Operation = depositOperation
-	historyEntity.User = *m.UserEntity
-	historyEntity.Order = orderEntity
+	historyEntity.OrderID = orderEntity.ID
 	m.UserEntity.BalanceHistory = append(m.UserEntity.BalanceHistory, historyEntity)
 	return m.DB.Save(m.UserEntity).Error
 }

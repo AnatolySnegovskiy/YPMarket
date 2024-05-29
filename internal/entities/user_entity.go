@@ -8,8 +8,8 @@ type UserEntity struct {
 	Password       string                 `json:"password,omitempty" gorm:"not null;name:password;type:varchar(255)"`
 	Balance        float64                `json:"balance,omitempty" gorm:"not null;default:0;name:balance;type:float"`
 	Withdrawal     float64                `json:"withdrawal,omitempty" gorm:"not null;default:0;name:withdrawal;type:float"`
-	BalanceHistory []BalanceHistoryEntity `json:"balance_history,omitempty" gorm:"foreignKey:user;references:ID"`
-	Orders         []OrderEntity          `json:"orders,omitempty" gorm:"foreignKey:user;references:ID"`
+	BalanceHistory []BalanceHistoryEntity `json:"balance_history,omitempty" gorm:"foreignKey:UserID;"`
+	Orders         []OrderEntity          `json:"orders,omitempty" gorm:"foreignKey:UserID;"`
 }
 
 func (UserEntity) TableName() string {

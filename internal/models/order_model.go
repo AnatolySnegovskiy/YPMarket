@@ -2,8 +2,11 @@ package models
 
 import (
 	"fmt"
+	"github.com/theplant/luhn"
 	"gorm.io/gorm"
+	"log"
 	"market/internal/entities"
+	"strconv"
 )
 
 type OrderModel struct {
@@ -15,6 +18,7 @@ const StatusNew = "NEW"
 
 func NewOrderModel(db *gorm.DB, userID int) *OrderModel {
 	u := &entities.UserEntity{}
+
 	if userID != 0 {
 		db.First(u, userID)
 	}
@@ -25,10 +29,20 @@ func NewOrderModel(db *gorm.DB, userID int) *OrderModel {
 }
 
 func (m *OrderModel) CreateOrder(orderNumber string) error {
+	num, err := strconv.Atoi(orderNumber)
+
+	if err != nil {
+		return fmt.Errorf("invalid request")
+	}
+
+	if !luhn.Valid(num) {
+		return fmt.Errorf("invalid format")
+	}
+
 	var existingOrder entities.OrderEntity
 	result := m.DB.Where("number = ?", orderNumber).First(&existingOrder)
 
-	if result.RowsAffected == 1 && existingOrder.User.ID == m.UserEntity.ID {
+	if result.RowsAffected == 1 && existingOrder.UserID == m.UserEntity.ID {
 		return fmt.Errorf("already exists current user")
 	}
 
@@ -40,7 +54,7 @@ func (m *OrderModel) CreateOrder(orderNumber string) error {
 		Number: orderNumber,
 		Status: StatusNew,
 	})
-
+	log.Println(m.UserEntity.ID)
 	return m.DB.Save(m.UserEntity).Error
 }
 

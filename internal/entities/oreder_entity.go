@@ -7,11 +7,11 @@ import (
 
 type OrderEntity struct {
 	gorm.Model `json:"gorm_._model"`
-	UpdatedAt  time.Time  `json:"updated_at,omitempty" gorm:"not null;name:updated_at;type:timestamp"`
-	Number     string     `json:"order,omitempty" gorm:"not null;unique;name:order;type:varchar(255)"`
-	Status     string     `json:"status,omitempty" gorm:"not null;name:status;type:varchar(255)"`
-	Accrual    float64    `json:"accrual,omitempty" gorm:"not null;name:accrual;type:float"`
-	User       UserEntity `json:"-" gorm:"not null;foreignKey:ID;references:UserID;name:user;type:bigint"`
+	UpdatedAt  time.Time `json:"updated_at,omitempty" gorm:"not null;name:updated_at;type:timestamp"`
+	Number     string    `json:"order,omitempty" gorm:"not null;unique;name:order;type:varchar(255)"`
+	Status     string    `json:"status,omitempty" gorm:"not null;name:status;type:varchar(255)"`
+	Accrual    float64   `json:"accrual,omitempty" gorm:"not null;name:accrual;type:float;default:0"`
+	UserID     uint      `json:"user_id,omitempty" gorm:"not null;name:user_id;type:bigint"`
 }
 
 func (OrderEntity) TableName() string {
