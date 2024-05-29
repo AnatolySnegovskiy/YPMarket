@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"gorm.io/gorm"
 	"io"
+	"log"
 	"market/internal/models"
 	"net/http"
 )
@@ -60,11 +61,15 @@ func GetOrdersHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Req
 func GetWithdrawalsHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request) {
 	db.WithContext(request.Context())
 	withdrawals := models.NewBalanceModel(db, getUserID(request)).GetWithdrawals()
+
+	response, _ := json.Marshal(withdrawals)
+	log.Println(string(response))
 	writer.Header().Set("Content-Type", "application/json")
 	err := json.NewEncoder(writer).Encode(withdrawals)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	writer.WriteHeader(http.StatusOK)
 }
