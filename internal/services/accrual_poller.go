@@ -64,11 +64,11 @@ func (o *OrderAccrual) PollAccrualSystem(interval time.Duration) {
 
 func (o *OrderAccrual) fetchOrderAccrual(orderNumber string) (*OrderAccrualResponse, error) {
 	client := &http.Client{
-		Timeout: time.Second * 10, // Таймаут запроса
+		Timeout: time.Second * 2,
 	}
 
 	url := fmt.Sprintf("%s/api/orders/%s", o.address, orderNumber)
-
+	log.Print(url)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -84,6 +84,7 @@ func (o *OrderAccrual) fetchOrderAccrual(orderNumber string) (*OrderAccrualRespo
 	case http.StatusOK:
 		var response OrderAccrualResponse
 		body, err := io.ReadAll(resp.Body)
+		log.Print(body)
 		if err != nil {
 			return nil, err
 		}

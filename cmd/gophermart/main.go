@@ -19,7 +19,7 @@ func main() {
 		panic(err)
 	}
 
-	go a.PollAccrualSystem(5 * time.Second)
+	go a.PollAccrualSystem(1 * time.Second)
 
 	err = s.Run(c.RunAddress)
 	if err != nil {
