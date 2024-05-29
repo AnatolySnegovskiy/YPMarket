@@ -87,8 +87,8 @@ func (m *OrderModel) Deposit(order string, sum float64) error {
 
 func (m *OrderModel) GetWithdrawals() []Withdrawals {
 	var withdrawals []Withdrawals
-	m.DB.Model(&entities.BalanceHistoryEntity{}).Select("sum(amount) as sum, balance_history.updated_at as processed_at, orders.number as order").
+	m.DB.Model(&entities.BalanceHistoryEntity{}).Select("sum(balance_history.amount) as sum, balance_history.updated_at as processed_at, orders.number as order").
 		Joins("JOIN orders ON balance_history.order_id = orders.id").
-		Where("user_id = ? AND operation = ?", m.UserEntity.ID, "withdraw").Find(withdrawals)
+		Where("orders.user_id = ? AND balance_history.operation = ?", m.UserEntity.ID, "withdraw").Find(withdrawals)
 	return withdrawals
 }
