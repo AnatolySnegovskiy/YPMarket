@@ -92,7 +92,7 @@ func (m *OrderModel) GetWithdrawals() []Withdrawals {
 	var withdrawals []Withdrawals
 	var balanceHistory []entities.BalanceHistoryEntity
 	m.DB.Model(&entities.BalanceHistoryEntity{}).First(balanceHistory)
-	response, _ := json.Marshal(withdrawals)
+	response, _ := json.Marshal(balanceHistory)
 	log.Println(string(response))
 
 	m.DB.Model(&entities.BalanceHistoryEntity{}).
