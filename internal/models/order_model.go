@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/theplant/luhn"
 	"gorm.io/gorm"
-	"log"
 	"market/internal/entities"
 	"strconv"
 )
@@ -54,7 +53,6 @@ func (m *OrderModel) CreateOrder(orderNumber string) error {
 		Number: orderNumber,
 		Status: StatusNew,
 	})
-	log.Println(m.UserEntity.ID)
 	return m.DB.Save(m.UserEntity).Error
 }
 
