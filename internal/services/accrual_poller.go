@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gorm.io/gorm"
 	"io"
+	"log"
 	"market/internal/models"
 	db2 "market/internal/system/db"
 	"net/http"
@@ -38,6 +39,7 @@ func (o *OrderAccrual) PollAccrualSystem(interval time.Duration) {
 	for range ticker.C {
 		orders := orderModel.GetOrdersByStatus([]string{"REGISTERED", "PROCESSING", "NEW"})
 		for _, order := range orders {
+			log.Printf("Polling order %s with id %d", order.Number, order.ID)
 			res, err := o.fetchOrderAccrual(order.Number)
 
 			if err != nil {
