@@ -70,12 +70,12 @@ func (m *OrderModel) Deposit(order string, sum float64) error {
 	}
 	orderEntity := entities.OrderEntity{}
 	m.DB.Model(&entities.OrderEntity{}).Where("number = ?", order).First(&orderEntity)
+	m.DB.Model(&entities.UserEntity{}).Where("id = ?", orderEntity.UserID).First(m.UserEntity)
 
 	if orderEntity.UserID != m.UserEntity.ID && m.UserEntity.ID != 0 {
 		return fmt.Errorf("invalid order")
 	}
 
-	m.DB.Model(&entities.UserEntity{}).Where("id = ?", orderEntity.UserID).First(m.UserEntity)
 	m.UserEntity.Balance += sum
 	historyEntity := entities.BalanceHistoryEntity{}
 	historyEntity.Amount = sum
