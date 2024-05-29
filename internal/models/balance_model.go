@@ -91,7 +91,7 @@ func (m *OrderModel) GetWithdrawals() []Withdrawals {
 		Select("sum(balance_history.amount) as sum, max(balance_history.updated_at) as processed_at, orders.number as order").
 		Joins("JOIN orders ON balance_history.order_id = orders.id").
 		Where("orders.user_id = ? AND balance_history.operation = ?", m.UserEntity.ID, "withdraw").
-		Group("balance_history.updated_at, order").
+		Group("balance_history.updated_at").
 		Find(&withdrawals)
 	return withdrawals
 }
