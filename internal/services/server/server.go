@@ -47,11 +47,11 @@ func (s *Server) Run(runAddress string) error {
 		func(writer http.ResponseWriter, request *http.Request) {
 			user.GetBalanceHandler(s.db, writer, request)
 		})
-	r.Post("/api/user/balance/withdraw",
+	r.With(iMiddleware.JwtAuthMiddleware).Post("/api/user/balance/withdraw",
 		func(writer http.ResponseWriter, request *http.Request) {
 			user.WithdrawHandler(s.db, writer, request)
 		})
-	r.Get("/api/user/withdrawals",
+	r.With(iMiddleware.JwtAuthMiddleware).Get("/api/user/withdrawals",
 		func(writer http.ResponseWriter, request *http.Request) {
 			user.GetWithdrawalsHandler(s.db, writer, request)
 		})
