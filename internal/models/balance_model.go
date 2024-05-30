@@ -55,7 +55,9 @@ func (m *OrderModel) Withdraw(order string, sum float64) error {
 	m.DB.Model(&entities.OrderEntity{}).Where("number = ?", order).First(&orderEntity)
 
 	if orderEntity.ID == 0 {
-		return fmt.Errorf("invalid order")
+		om := NewOrderModel(m.DB, (int)(m.UserEntity.ID))
+		om.CreateOrder(order)
+		m.DB.Model(&entities.OrderEntity{}).Where("number = ?", order).First(&orderEntity)
 	}
 
 	m.UserEntity.Balance -= sum
