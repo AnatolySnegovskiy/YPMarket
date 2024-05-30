@@ -56,7 +56,10 @@ func (m *OrderModel) Withdraw(order string, sum float64) error {
 
 	if orderEntity.ID == 0 {
 		om := NewOrderModel(m.DB, (int)(m.UserEntity.ID))
-		om.CreateOrder(order)
+		err := om.CreateOrder(order)
+		if err != nil {
+			return err
+		}
 		m.DB.Model(&entities.OrderEntity{}).Where("number = ?", order).First(&orderEntity)
 	}
 
