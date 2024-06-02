@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"market/config"
 	"market/internal/services"
 	"market/internal/services/server"
@@ -21,6 +22,7 @@ func main() {
 
 	go a.PollAccrualSystem(1 * time.Second)
 
+	fmt.Println("Server started")
 	err = s.Run(c.RunAddress)
 	if err != nil {
 		panic(err)

@@ -1,8 +1,8 @@
 package server
 
 import (
-	"github.com/go-chi/chi"
-	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"gorm.io/gorm"
 	"market/internal/services/server/hendlers/user"
 	iMiddleware "market/internal/services/server/middleware"
