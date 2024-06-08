@@ -2,7 +2,6 @@ package user
 
 import (
 	"bytes"
-	"context"
 	"encoding/json"
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
@@ -11,7 +10,6 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"io"
-	"market/internal/services/server/middleware"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -19,19 +17,7 @@ import (
 	"time"
 )
 
-type testCase struct {
-	name           string
-	handler        http.HandlerFunc
-	method         string
-	url            string
-	requestBody    interface{}
-	expectedStatus int
-	queryMock      func(mock sqlmock.Sqlmock)
-}
-
-const UserIDContextKey middleware.UserContextKey = "userID"
-
-func TestHandlers(t *testing.T) {
+func TestBalanceHandlers(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
@@ -255,8 +241,4 @@ func WithdrawHandlerMockQueryError(mock sqlmock.Sqlmock) {
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnError(errors.New("some error"))
 	mock.ExpectRollback()
-}
-
-func upLogin(request *http.Request) *http.Request {
-	return request.WithContext(context.WithValue(request.Context(), UserIDContextKey, 123))
 }

@@ -16,20 +16,6 @@ func CreateToken(userID uint) (string, error) {
 	return tokenString, err
 }
 
-func ValidateToken(signedToken string) (bool, error) {
-	token, err := jwt.Parse(signedToken, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
-		return []byte("your_secret_key"), nil
-	})
-
-	if err != nil {
-		return false, err
-	}
-	return token.Valid, nil
-}
-
 func GetUserID(signedToken string) (int, error) {
 	token, err := jwt.Parse(signedToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
