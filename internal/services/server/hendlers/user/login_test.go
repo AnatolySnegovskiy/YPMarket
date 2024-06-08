@@ -2,7 +2,9 @@ package user
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
+	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
@@ -12,6 +14,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"regexp"
+	"strings"
 	"testing"
 )
 
@@ -108,6 +111,41 @@ func TestUserHandlers(t *testing.T) {
 	}
 }
 
-func LoginHandlerMockQuery(mock sqlmock.Sqlmock) {
+type mockResponseWriter struct {
+	writeError error
+}
 
+func (m *mockResponseWriter) Header() http.Header {
+	return make(http.Header)
+}
+
+func (m *mockResponseWriter) Write(p []byte) (int, error) {
+	return 0, m.writeError
+}
+
+func (m *mockResponseWriter) WriteHeader(statusCode int) {
+}
+
+func TestLoginHandler_WriteError(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	gdb, _ := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+	gdb.Logger = gdb.Logger.LogMode(logger.Silent)
+	rw := &mockResponseWriter{writeError: errors.New("mock write error")}
+
+	req := httptest.NewRequest("POST", "http://example.com/login", strings.NewReader(`{"login": "test", "password": "password"}`))
+	ctx := context.Background()
+	req = req.WithContext(ctx)
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "users" WHERE email = $1 AND "users"."deleted_at" IS NULL ORDER BY "users"."id" LIMIT $2`)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "email", "password", "balance", "withdrawal"}).
+			AddRow(1, dateMock, dateMock, nil, "login@example.com", "$2a$10$2/cm/mpDH7sLoYHResqdvukbGA.6WcHkEFYDmSAhFIwjMsLdxyIxe", 5000000, 0))
+
+	LoginHandler(gdb, rw, req)
+	
+	assert.NotNil(t, rw.writeError, "Expected write error to be not nil")
+	assert.Equal(t, "mock write error", rw.writeError.Error(), "Expected write error message to be 'mock write error'")
 }
