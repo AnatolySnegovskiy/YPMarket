@@ -9,6 +9,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestCreateToken(t *testing.T) {
+	token, err := CreateToken(100)
+	assert.NoError(t, err)
+	assert.NotEmpty(t, token)
+}
+
 // Helper function to create a token for testing
 func createTestJWT(userID int, secretKey string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
