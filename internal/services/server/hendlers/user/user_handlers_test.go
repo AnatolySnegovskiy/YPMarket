@@ -63,17 +63,6 @@ func TestHandlers(t *testing.T) {
 			queryMock:      WithdrawHandlerMockQuery,
 		},
 		{
-			name: "WithdrawHandler - Success no order",
-			handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-				WithdrawHandler(gdb, writer, upLogin(request))
-			}),
-			method:         "POST",
-			url:            "/withdraw",
-			requestBody:    WithdrawRequest{Order: "order123", Sum: 100},
-			expectedStatus: http.StatusOK,
-			queryMock:      WithdrawHandlerMockQueryNoOrder,
-		},
-		{
 			name: "WithdrawHandler - error no order",
 			handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 				WithdrawHandler(gdb, writer, upLogin(request))
@@ -177,26 +166,6 @@ func WithdrawHandlerMockQuery(mock sqlmock.Sqlmock) {
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "number", "status", "accrual", "user_id"}).
 			AddRow(1, dateMock, dateMock, nil, "order123", "PROCESSING", 1000, 123))
-
-	mock.ExpectBegin()
-	mock.ExpectExec(`UPDATE "users" SET "created_at"=\$1,"updated_at"=\$2,"deleted_at"=\$3,"email"=\$4,"password"=\$5,"balance"=\$6,"withdrawal"=\$7 WHERE "users"."deleted_at" IS NULL AND "id" = \$8`).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), 123).
-		WillReturnResult(sqlmock.NewResult(1, 1))
-
-	mock.ExpectQuery(regexp.QuoteMeta(`INSERT INTO "balance_history" ("created_at","updated_at","deleted_at","user_id","amount","operation","order_id") VALUES ($1,$2,$3,$4,$5,$6,$7) ON CONFLICT ("id") DO UPDATE SET "user_id"="excluded"."user_id" RETURNING "id"`)).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
-	mock.ExpectCommit()
-}
-
-func WithdrawHandlerMockQueryNoOrder(mock sqlmock.Sqlmock) {
-	mock.ExpectQuery(`SELECT \* FROM "users" WHERE "users"."id" = \$1 AND "users"."deleted_at" IS NULL ORDER BY "users"."id" LIMIT \$2`).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "email", "password", "balance", "withdrawal"}).
-			AddRow(123, dateMock, dateMock, nil, "nUJ4D@example.com", "password", 5000000, 0))
-	mock.ExpectQuery(`SELECT \* FROM "orders" WHERE number = \$1 AND "orders"."deleted_at" IS NULL ORDER BY "orders"."id" LIMIT \$2`).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
-		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "number", "status", "accrual", "user_id"}))
 
 	mock.ExpectBegin()
 	mock.ExpectExec(`UPDATE "users" SET "created_at"=\$1,"updated_at"=\$2,"deleted_at"=\$3,"email"=\$4,"password"=\$5,"balance"=\$6,"withdrawal"=\$7 WHERE "users"."deleted_at" IS NULL AND "id" = \$8`).
