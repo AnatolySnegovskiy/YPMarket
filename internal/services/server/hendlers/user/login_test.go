@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -20,7 +21,7 @@ func TestUserHandlers(t *testing.T) {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 	gdb, _ := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
-	//gdb.Logger = gdb.Logger.LogMode(logger.Silent)
+	gdb.Logger = gdb.Logger.LogMode(logger.Silent)
 
 	testCases := []testCase{
 		{
