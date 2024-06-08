@@ -30,8 +30,7 @@ func NewOrderAccrual(address string, dsn string) (*OrderAccrual, error) {
 	}, err
 }
 
-func (o *OrderAccrual) PollAccrualSystem(interval time.Duration) {
-	ticker := time.NewTicker(interval)
+func (o *OrderAccrual) PollAccrualSystem(ticker *time.Ticker) {
 	balanceModel := models.NewBalanceModel(o.db, 0)
 	orderModel := models.NewOrderModel(o.db, 0)
 

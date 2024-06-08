@@ -19,8 +19,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	go a.PollAccrualSystem(1 * time.Second)
+	ticker := time.NewTicker(1 * time.Second)
+	defer ticker.Stop()
+	go a.PollAccrualSystem(ticker)
 
 	fmt.Println("Server started")
 	err = s.Run(c.RunAddress)
