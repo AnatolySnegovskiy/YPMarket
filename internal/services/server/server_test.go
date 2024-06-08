@@ -12,7 +12,7 @@ func TestServer_Run(t *testing.T) {
 	done := make(chan error)
 
 	go func() {
-		done <- s.Run("")
+		done <- s.Run("127.0.0.1:9090")
 	}()
 
 	select {
