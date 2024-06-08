@@ -27,5 +27,6 @@ func TestJwtAuthMiddleware(t *testing.T) {
 	assert.Nil(t, err)
 	resp, err = http.DefaultClient.Do(req)
 	assert.Nil(t, err)
+	defer resp.Body.Close()
 	assert.Equal(t, http.StatusUnauthorized, resp.StatusCode)
 }
