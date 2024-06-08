@@ -27,23 +27,14 @@ func LoginHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request
 	u := models.NewUserModel(db)
 	token, err := u.Authenticate(loginRequest.Login, loginRequest.Password)
 
-	if err != nil {
-		switch err.Error() {
-		case "invalid login or password":
-			http.Error(writer, "Invalid login or password", http.StatusUnauthorized)
-			return
-		default:
-			http.Error(writer, "Internal server error", http.StatusInternalServerError)
-			return
-		}
+	if err.Error() == "invalid login or password" {
+		http.Error(writer, "Invalid login or password", http.StatusUnauthorized)
+		return
 	}
 
 	writer.Header().Set("Authorization", token)
 	writer.WriteHeader(http.StatusOK)
-	_, err = writer.Write([]byte(token))
-	if err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
-	}
+	writer.Write([]byte(token))
 }
 
 func getUserID(request *http.Request) int {
