@@ -23,11 +23,12 @@ func TestGetUserID(t *testing.T) {
 	secretKey := "your_secret_key"
 	validUserID := 123
 	wrongMethodToken := "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.e30.invalidsignature"
-	noUserIDToken, _ := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{}).SignedString([]byte("your_secret_key"))
-	wrongTypeUserIDToken, _ := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"user_id": "not-a-float64"}).SignedString([]byte("your_secret_key"))
+	noUserIDToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{}).SignedString([]byte("your_secret_key"))
+	assert.NoError(t, err, "creating test JWT should not produce an error")
+	wrongTypeUserIDToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{"user_id": "not-a-float64"}).SignedString([]byte("your_secret_key"))
+	assert.NoError(t, err, "creating test JWT should not produce an error")
 	invalidToken := "invalid.token.parts"
 
-	// Create a valid token for testing
 	validToken, err := createTestJWT(validUserID, secretKey)
 	assert.NoError(t, err, "creating test JWT should not produce an error")
 

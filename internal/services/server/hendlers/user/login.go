@@ -40,7 +40,10 @@ func LoginHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request
 
 	writer.Header().Set("Authorization", token)
 	writer.WriteHeader(http.StatusOK)
-	writer.Write([]byte(token))
+	_, err = writer.Write([]byte(token))
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func getUserID(request *http.Request) int {
