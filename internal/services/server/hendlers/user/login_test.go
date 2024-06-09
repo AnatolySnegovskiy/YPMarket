@@ -1,16 +1,13 @@
 package user
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"io"
 	"net/http"
 	"net/http/httptest"
 	"regexp"
@@ -93,22 +90,7 @@ func TestUserHandlers(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			req := httptest.NewRequest(tc.method, tc.url, nil)
-			if tc.requestBody != nil {
-				body, _ := json.Marshal(tc.requestBody)
-				req.Body = io.NopCloser(bytes.NewReader(body))
-			}
-
-			rr := httptest.NewRecorder()
-			tc.queryMock(mock)
-			tc.handler.ServeHTTP(rr, req)
-			if assert.Equal(t, tc.expectedStatus, rr.Code) == false {
-				t.Errorf(rr.Body.String())
-			}
-		})
-	}
+	RunTestCases(t, testCases, mock)
 }
 
 type mockResponseWriter struct {
@@ -145,7 +127,7 @@ func TestLoginHandler_WriteError(t *testing.T) {
 			AddRow(1, dateMock, dateMock, nil, "login@example.com", "$2a$10$2/cm/mpDH7sLoYHResqdvukbGA.6WcHkEFYDmSAhFIwjMsLdxyIxe", 5000000, 0))
 
 	LoginHandler(gdb, rw, req)
-	
+
 	assert.NotNil(t, rw.writeError, "Expected write error to be not nil")
 	assert.Equal(t, "mock write error", rw.writeError.Error(), "Expected write error message to be 'mock write error'")
 }

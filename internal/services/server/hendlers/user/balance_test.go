@@ -1,20 +1,14 @@
 package user
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/stretchr/testify/assert"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
-	"io"
 	"net/http"
-	"net/http/httptest"
 	"regexp"
 	"testing"
-	"time"
 )
 
 func TestBalanceHandlers(t *testing.T) {
@@ -127,25 +121,8 @@ func TestBalanceHandlers(t *testing.T) {
 		},
 	}
 
-	for _, tc := range testCases {
-		t.Run(tc.name, func(t *testing.T) {
-			req := httptest.NewRequest(tc.method, tc.url, nil)
-			if tc.requestBody != nil {
-				body, _ := json.Marshal(tc.requestBody)
-				req.Body = io.NopCloser(bytes.NewReader(body))
-			}
-
-			rr := httptest.NewRecorder()
-			tc.queryMock(mock)
-			tc.handler.ServeHTTP(rr, req)
-			if assert.Equal(t, tc.expectedStatus, rr.Code) == false {
-				t.Errorf(rr.Body.String())
-			}
-		})
-	}
+	RunTestCases(t, testCases, mock)
 }
-
-var dateMock, _ = time.Parse("2006-01-02 15:04:05.000000", "")
 
 func GetBalanceHandlerMockQuery(mock sqlmock.Sqlmock) {
 	mock.ExpectQuery(`SELECT \* FROM "users" WHERE "users"."id" = \$1 AND "users"."deleted_at" IS NULL ORDER BY "users"."id" LIMIT \$2`).

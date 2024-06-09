@@ -10,14 +10,10 @@ import (
 
 func CreateOrderHandler(db *gorm.DB, writer http.ResponseWriter, request *http.Request) {
 	db.WithContext(request.Context())
-	body, err := io.ReadAll(request.Body)
-	if err != nil {
-		http.Error(writer, "Failed to read request body", http.StatusInternalServerError)
-		return
-	}
-
+	body, _ := io.ReadAll(request.Body)
 	om := models.NewOrderModel(db, getUserID(request))
-	err = om.CreateOrder(string(body))
+
+	err := om.CreateOrder(string(body))
 	if err != nil {
 		switch err.Error() {
 		case "already exists current user":
