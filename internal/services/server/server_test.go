@@ -7,6 +7,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"market/internal/system"
 	"net/http"
 	"testing"
 	"time"
@@ -67,50 +68,57 @@ func TestServer_APIRequests(t *testing.T) {
 	defer Resp.Body.Close()
 	assert.Equal(t, http.StatusBadRequest, Resp.StatusCode)
 
+	token, _ := system.CreateToken(1)
+
 	url = fmt.Sprintf("%s/api/user/orders", baseURL)
 	Req, _ = http.NewRequest("POST", url, nil)
+	Req.Header.Set("Authorization", token)
 	Resp, err = client.Do(Req)
 	if err != nil {
 		t.Fatalf("Error making POST request: %v", err)
 	}
 	defer Resp.Body.Close()
-	assert.Equal(t, http.StatusUnauthorized, Resp.StatusCode)
+	assert.Equal(t, http.StatusBadRequest, Resp.StatusCode)
 
 	url = fmt.Sprintf("%s/api/user/balance", baseURL)
 	Req, _ = http.NewRequest("GET", url, nil)
+	Req.Header.Set("Authorization", token)
 	Resp, err = client.Do(Req)
 	if err != nil {
 		t.Fatalf("Error making POST request: %v", err)
 	}
 	defer Resp.Body.Close()
-	assert.Equal(t, http.StatusUnauthorized, Resp.StatusCode)
+	assert.Equal(t, http.StatusOK, Resp.StatusCode)
 
 	url = fmt.Sprintf("%s/api/user/balance/withdraw", baseURL)
 	Req, _ = http.NewRequest("POST", url, nil)
+	Req.Header.Set("Authorization", token)
 	Resp, err = client.Do(Req)
 	if err != nil {
 		t.Fatalf("Error making POST request: %v", err)
 	}
 	defer Resp.Body.Close()
-	assert.Equal(t, http.StatusUnauthorized, Resp.StatusCode)
+	assert.Equal(t, http.StatusBadRequest, Resp.StatusCode)
 
 	url = fmt.Sprintf("%s/api/user/withdrawals", baseURL)
 	Req, _ = http.NewRequest("GET", url, nil)
+	Req.Header.Set("Authorization", token)
 	Resp, err = client.Do(Req)
 	if err != nil {
 		t.Fatalf("Error making POST request: %v", err)
 	}
 	defer Resp.Body.Close()
-	assert.Equal(t, http.StatusUnauthorized, Resp.StatusCode)
+	assert.Equal(t, http.StatusOK, Resp.StatusCode)
 
 	url = fmt.Sprintf("%s/api/user/orders", baseURL)
 	Req, _ = http.NewRequest("GET", url, nil)
+	Req.Header.Set("Authorization", token)
 	Resp, err = client.Do(Req)
 	if err != nil {
 		t.Fatalf("Error making POST request: %v", err)
 	}
 	defer Resp.Body.Close()
-	assert.Equal(t, http.StatusUnauthorized, Resp.StatusCode)
+	assert.Equal(t, http.StatusOK, Resp.StatusCode)
 
 	select {
 	case err := <-done:
