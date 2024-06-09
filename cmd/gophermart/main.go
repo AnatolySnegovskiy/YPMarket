@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"market/config"
 	"market/internal/services"
@@ -21,7 +22,7 @@ func main() {
 	}
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
-	go a.PollAccrualSystem(ticker)
+	go a.PollAccrualSystem(ticker, context.Background())
 
 	fmt.Println("Server started")
 	err = s.Run(c.RunAddress)
