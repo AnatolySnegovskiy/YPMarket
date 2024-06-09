@@ -17,6 +17,11 @@ import (
 	"testing"
 )
 
+func TestNewOrderAccrual(t *testing.T) {
+	_, err := NewOrderAccrual("", "")
+	assert.Error(t, err)
+}
+
 func TestPollAccrualSystem(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
