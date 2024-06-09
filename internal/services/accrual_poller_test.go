@@ -2,7 +2,7 @@ package services
 
 import (
 	"context"
-	"errors"
+	"database/sql"
 	"github.com/DATA-DOG/go-sqlmock"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -89,13 +89,19 @@ func TestPollAccrualSystemError1(t *testing.T) {
 		}
 	}))
 	defer server.Close()
-	db, _, err := sqlmock.New()
+	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 	gdb, _ := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
 	gdb.Logger = gdb.Logger.LogMode(logger.Silent)
 	o := &OrderAccrual{address: server.URL, db: gdb}
+
+	var dateMock, _ = time.Parse("2006-01-02 15:04:05.000000", "")
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "orders" WHERE status IN ($1,$2,$3) AND "orders"."deleted_at" IS NULL`)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "number", "status", "accrual", "user_id"}).
+			AddRow(123, dateMock, dateMock, nil, "123", "PROCESSED", 1000, 123))
 
 	ticker := time.NewTicker(1 * time.Second)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second+time.Millisecond*500)
@@ -125,10 +131,14 @@ func TestPollAccrualSystemError2(t *testing.T) {
 	gdb.Logger = gdb.Logger.LogMode(logger.Silent)
 	o := &OrderAccrual{address: server.URL, db: gdb}
 
+	var dateMock, _ = time.Parse("2006-01-02 15:04:05.000000", "")
 	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "orders" WHERE status IN ($1,$2,$3) AND "orders"."deleted_at" IS NULL`)).
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "number", "status", "accrual", "user_id"}).
-			RowError(0, errors.New("some error")))
+			AddRow(123, dateMock, dateMock, nil, "123", "PROCESSED", 1000, 123))
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "orders" WHERE number = $1 AND "orders"."deleted_at" IS NULL ORDER BY "orders"."id" LIMIT $2`)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnError(sql.ErrNoRows)
 
 	ticker := time.NewTicker(1 * time.Second)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second+time.Millisecond*500)
@@ -172,7 +182,7 @@ func TestFetchOrderAccrual(t *testing.T) {
 		{"123", &OrderAccrualResponse{"123", "PROCESSED", 100}, ""},
 		{"333", nil, "invalid character ':' after top-level value"},
 		{"456", nil, "the order is not registered in the payment system"},
-		{"789", nil, "the number of requests to the service has been exceeded\n"},
+		{"789", nil, "the number of requests to the service has been exceeded"},
 		{"999", nil, "internal server error"},
 		{"000", nil, "unknown response code: 404"},
 	}

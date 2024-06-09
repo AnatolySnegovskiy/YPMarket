@@ -97,7 +97,7 @@ func (o *OrderAccrual) fetchOrderAccrual(orderNumber string) (*OrderAccrualRespo
 	case http.StatusNoContent:
 		return nil, fmt.Errorf("the order is not registered in the payment system")
 	case http.StatusTooManyRequests:
-		return nil, fmt.Errorf("the number of requests to the service has been exceeded\n")
+		return nil, fmt.Errorf("the number of requests to the service has been exceeded")
 	case http.StatusInternalServerError:
 		return nil, fmt.Errorf("internal server error")
 	default:
