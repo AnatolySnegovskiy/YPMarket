@@ -37,23 +37,13 @@ func (m *UserModel) Registration(email string, password string) error {
 	if u.ID != 0 {
 		return fmt.Errorf("user already exists")
 	} else {
-		hp, err := hashPassword(password)
-		if err != nil {
-			return fmt.Errorf("failed to hash password. Error: " + err.Error())
-		}
+		hp, _ := hashPassword(password)
 		u = &entities.UserEntity{
 			Email:    email,
 			Password: hp,
 		}
 		return m.DB.Create(u).Error
 	}
-}
-
-func (m *UserModel) UserExists(email string) (bool, error) {
-	var count int64
-	where := "email = ?"
-	err := m.DB.Model(m.UserEntity).Where(where, email).Count(&count).Error
-	return count > 0, err
 }
 
 func (m *UserModel) getUserByEmail(email string) (*entities.UserEntity, error) {

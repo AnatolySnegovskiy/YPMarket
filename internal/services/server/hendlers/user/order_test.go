@@ -65,6 +65,17 @@ func TestOrderHandlers(t *testing.T) {
 			queryMock:      CreateOrderHandlerMockQuery,
 		},
 		{
+			name: "\tGetOrdersHandler - Success already exists current user",
+			handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+				CreateOrderHandler(gdb, writer, upLogin(request))
+			}),
+			method:         "POST",
+			url:            "/create_order",
+			requestBody:    60480142,
+			expectedStatus: http.StatusOK,
+			queryMock:      CreateOrderStatusAlreadyExistMockQuery,
+		},
+		{
 			name: "CreateOrderHandler - StatusInternalServerError",
 			handler: http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 				CreateOrderHandler(gdb, writer, upLogin(request))
@@ -127,6 +138,15 @@ func CreateOrderStatusConflictMockQuery(mock sqlmock.Sqlmock) {
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "number", "status", "accrual", "user_id"}).
 			AddRow(123, dateMock, dateMock, nil, "order123", "PROCESSING", 1000, 1))
+}
+
+func CreateOrderStatusAlreadyExistMockQuery(mock sqlmock.Sqlmock) {
+	login(mock)
+
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "orders" WHERE number = $1 AND "orders"."deleted_at" IS NULL ORDER BY "orders"."id" LIMIT $2`)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "number", "status", "accrual", "user_id"}).
+			AddRow(123, dateMock, dateMock, nil, "order123", "PROCESSING", 1000, 123))
 }
 
 func CreateOrderHandlerMockQuery(mock sqlmock.Sqlmock) {

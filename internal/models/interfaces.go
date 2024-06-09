@@ -18,6 +18,5 @@ type OrderModelInterface interface {
 type UserModelInterface interface {
 	Authenticate(email string, password string) (string, error)
 	Registration(email string, password string) error
-	UserExists(email string) (bool, error)
 	getUserByEmail(email string) (*entities.UserEntity, error)
 }
