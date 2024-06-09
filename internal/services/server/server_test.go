@@ -42,13 +42,13 @@ func TestServer_APIRequests(t *testing.T) {
 	s.db = gdb
 	done := make(chan error)
 	go func() {
-		done <- s.Run("127.0.0.1:9090")
+		done <- s.Run("127.0.0.1:9999")
 	}()
 
 	time.Sleep(100 * time.Millisecond)
 	client := &http.Client{}
 
-	baseURL := "http://127.0.0.1:9090"
+	baseURL := "http://127.0.0.1:9999"
 	url := fmt.Sprintf("%s/api/user/register", baseURL)
 	Req, _ := http.NewRequest("POST", url, nil)
 	Resp, err := client.Do(Req)
