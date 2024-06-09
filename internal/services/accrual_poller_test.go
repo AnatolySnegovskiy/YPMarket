@@ -5,6 +5,7 @@ import (
 	"github.com/DATA-DOG/go-sqlmock"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 	"net/http"
 	"regexp"
 	"time"
@@ -35,7 +36,7 @@ func TestPollAccrualSystem(t *testing.T) {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
 	gdb, _ := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
-	//gdb.Logger = gdb.Logger.LogMode(logger.Silent)
+	gdb.Logger = gdb.Logger.LogMode(logger.Silent)
 	o := &OrderAccrual{address: server.URL, db: gdb}
 
 	ticker := time.NewTicker(1 * time.Second)
@@ -62,6 +63,64 @@ func TestPollAccrualSystem(t *testing.T) {
 		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
 		WillReturnRows(sqlmock.NewRows([]string{"id"}).AddRow(1))
 	mock.ExpectCommit()
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second+time.Millisecond*500)
+	defer cancel()
+	o.PollAccrualSystem(ticker, ctx)
+}
+
+func TestPollAccrualSystemError1(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/orders/123":
+			w.WriteHeader(http.StatusOK)
+			_, err := w.Write([]byte(`"order": "123", "status": "PROCESSED", "accrual": 100}`))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+	db, _, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	gdb, _ := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+	gdb.Logger = gdb.Logger.LogMode(logger.Silent)
+	o := &OrderAccrual{address: server.URL, db: gdb}
+
+	ticker := time.NewTicker(1 * time.Second)
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second+time.Millisecond*500)
+	defer cancel()
+	o.PollAccrualSystem(ticker, ctx)
+}
+
+func TestPollAccrualSystemError2(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/orders/123":
+			w.WriteHeader(http.StatusOK)
+			_, err := w.Write([]byte(`{"order": "123", "status": "PROCESSED", "accrual": 100}`))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
+		default:
+			w.WriteHeader(http.StatusNotFound)
+		}
+	}))
+	defer server.Close()
+	db, _, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+	}
+	gdb, _ := gorm.Open(postgres.New(postgres.Config{Conn: db}), &gorm.Config{})
+	gdb.Logger = gdb.Logger.LogMode(logger.Silent)
+	o := &OrderAccrual{address: server.URL, db: gdb}
+
+	ticker := time.NewTicker(1 * time.Second)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second+time.Millisecond*500)
 	defer cancel()
