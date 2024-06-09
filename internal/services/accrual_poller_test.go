@@ -15,7 +15,10 @@ func TestFetchOrderAccrual(t *testing.T) {
 		switch r.URL.Path {
 		case "/api/orders/123":
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(`{"order": "123", "status": "PROCESSED", "accrual": 100}`))
+			_, err := w.Write([]byte(`{"order": "123", "status": "PROCESSED", "accrual": 100}`))
+			if err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+			}
 		case "/api/orders/456":
 			w.WriteHeader(http.StatusNoContent)
 		case "/api/orders/789":
