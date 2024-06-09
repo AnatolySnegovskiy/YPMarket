@@ -51,45 +51,67 @@ func TestServer_APIRequests(t *testing.T) {
 	baseURL := "http://127.0.0.1:9090"
 	url := fmt.Sprintf("%s/api/user/register", baseURL)
 	Req, _ := http.NewRequest("POST", url, nil)
-	Resp, _ := client.Do(Req)
+	Resp, err := client.Do(Req)
+	if err != nil {
+		t.Fatalf("Error making POST request: %v", err)
+	}
 	defer Resp.Body.Close()
 	assert.Equal(t, http.StatusBadRequest, Resp.StatusCode)
 
 	url = fmt.Sprintf("%s/api/user/login", baseURL)
 	Req, _ = http.NewRequest("POST", url, nil)
-	Resp, _ = client.Do(Req)
+	Resp, err = client.Do(Req)
+	if err != nil {
+		t.Fatalf("Error making POST request: %v", err)
+	}
 	defer Resp.Body.Close()
 	assert.Equal(t, http.StatusBadRequest, Resp.StatusCode)
 
 	url = fmt.Sprintf("%s/api/user/orders", baseURL)
 	Req, _ = http.NewRequest("POST", url, nil)
-	Resp, _ = client.Do(Req)
+	Resp, err = client.Do(Req)
+	if err != nil {
+		t.Fatalf("Error making POST request: %v", err)
+	}
 	defer Resp.Body.Close()
 	assert.Equal(t, http.StatusUnauthorized, Resp.StatusCode)
 
 	url = fmt.Sprintf("%s/api/user/balance", baseURL)
 	Req, _ = http.NewRequest("GET", url, nil)
-	Resp, _ = client.Do(Req)
+	Resp, err = client.Do(Req)
+	if err != nil {
+		t.Fatalf("Error making POST request: %v", err)
+	}
 	defer Resp.Body.Close()
 	assert.Equal(t, http.StatusUnauthorized, Resp.StatusCode)
 
 	url = fmt.Sprintf("%s/api/user/balance/withdraw", baseURL)
 	Req, _ = http.NewRequest("POST", url, nil)
-	Resp, _ = client.Do(Req)
+	Resp, err = client.Do(Req)
+	if err != nil {
+		t.Fatalf("Error making POST request: %v", err)
+	}
 	defer Resp.Body.Close()
 	assert.Equal(t, http.StatusUnauthorized, Resp.StatusCode)
 
 	url = fmt.Sprintf("%s/api/user/withdrawals", baseURL)
 	Req, _ = http.NewRequest("GET", url, nil)
-	Resp, _ = client.Do(Req)
+	Resp, err = client.Do(Req)
+	if err != nil {
+		t.Fatalf("Error making POST request: %v", err)
+	}
 	defer Resp.Body.Close()
 	assert.Equal(t, http.StatusUnauthorized, Resp.StatusCode)
 
 	url = fmt.Sprintf("%s/api/user/orders", baseURL)
 	Req, _ = http.NewRequest("GET", url, nil)
-	Resp, _ = client.Do(Req)
+	Resp, err = client.Do(Req)
+	if err != nil {
+		t.Fatalf("Error making POST request: %v", err)
+	}
 	defer Resp.Body.Close()
 	assert.Equal(t, http.StatusUnauthorized, Resp.StatusCode)
+
 	select {
 	case err := <-done:
 		assert.Nil(t, err)
