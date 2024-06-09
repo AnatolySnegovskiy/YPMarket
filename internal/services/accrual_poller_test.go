@@ -2,6 +2,7 @@ package services
 
 import (
 	"context"
+	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -78,7 +79,7 @@ func TestPollAccrualSystemError1(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/api/orders/123":
-			w.WriteHeader(http.StatusOK)
+			w.WriteHeader(http.StatusInternalServerError)
 			_, err := w.Write([]byte(`"order": "123", "status": "PROCESSED", "accrual": 100}`))
 			if err != nil {
 				w.WriteHeader(http.StatusInternalServerError)
@@ -97,7 +98,6 @@ func TestPollAccrualSystemError1(t *testing.T) {
 	o := &OrderAccrual{address: server.URL, db: gdb}
 
 	ticker := time.NewTicker(1 * time.Second)
-
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second+time.Millisecond*500)
 	defer cancel()
 	o.PollAccrualSystem(ticker, ctx)
@@ -117,7 +117,7 @@ func TestPollAccrualSystemError2(t *testing.T) {
 		}
 	}))
 	defer server.Close()
-	db, _, err := sqlmock.New()
+	db, mock, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
@@ -125,8 +125,12 @@ func TestPollAccrualSystemError2(t *testing.T) {
 	gdb.Logger = gdb.Logger.LogMode(logger.Silent)
 	o := &OrderAccrual{address: server.URL, db: gdb}
 
-	ticker := time.NewTicker(1 * time.Second)
+	mock.ExpectQuery(regexp.QuoteMeta(`SELECT * FROM "orders" WHERE status IN ($1,$2,$3) AND "orders"."deleted_at" IS NULL`)).
+		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg()).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "created_at", "updated_at", "deleted_at", "number", "status", "accrual", "user_id"}).
+			RowError(0, errors.New("some error")))
 
+	ticker := time.NewTicker(1 * time.Second)
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second+time.Millisecond*500)
 	defer cancel()
 	o.PollAccrualSystem(ticker, ctx)
